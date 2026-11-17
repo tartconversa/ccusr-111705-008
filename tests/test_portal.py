@@ -10,6 +10,6 @@ class PortalInteractionTest(BrowserBaselineTest):
             try:
                 page = browser.new_page()
                 page.goto(self.origin + "detail?id=" + DATA["items"][0]["id"], wait_until="domcontentloaded")
-                page.locator('#gallery-next').click();page.locator('#gallery-state').get_by_text('规格素材').wait_for()
+                page.locator('#variant').select_option('蓝色款');page.locator('#gallery-next').click();page.locator('#gallery-state').get_by_text('蓝色款：规格素材').wait_for();page.locator('#revoke').click();self.assertIn('授权撤回',page.locator('#license').inner_text())
             finally:
                 browser.close()
