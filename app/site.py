@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit, parse_qs
 from html import escape
-from .portal_behaviour import detail_fragment
+from .portal_behaviour import detail_fragment, source_extension
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = json.loads((ROOT / 'fixtures' / 'portal.json').read_text(encoding='utf-8'))
@@ -15,7 +15,7 @@ def render_index():
 
 def render_detail(item):
     options = ''.join(f'<option value="{escape(str(choice))}">{escape(str(choice))}</option>' for choice in item['choices'])
-    fragment = detail_fragment(item)
+    fragment = detail_fragment(item) + source_extension(item)
     return f"""<!doctype html><html lang="zh"><meta charset="utf-8"><title>{escape(item['name'])}</title><a href="/">返回目录</a><main data-key="{escape(item['id'])}"><h1>{escape(item['name'])}</h1><p id="summary">{escape(item['summary'])}</p><label>{escape(DATA['dimensions'][0])}<select id="choice">{options}</select></label><button id="details" type="button">{escape(DATA['dimensions'][1])}</button><section id="panel" aria-live="polite"></section><button id="preview" type="button">{escape(DATA['dimensions'][2])}</button><section id="result" aria-live="polite"></section>{fragment}</main><script>
 const choice=document.getElementById('choice'); const panel=document.getElementById('panel'); const result=document.getElementById('result');
 choice.addEventListener('change',()=>{{panel.textContent='';result.textContent='';}});
@@ -32,11 +32,30 @@ class Handler(BaseHTTPRequestHandler):
             key = parse_qs(parsed.query).get('id', [''])[0]
             item = next((row for row in DATA['items'] if row['id'] == key), None)
             body, code = (render_detail(item), 200) if item else ('未找到', 404)
+        elif parsed.path == '/material':
+            query = parse_qs(parsed.query)
+            product = query.get('product', [''])[0]
+            variant = query.get('variant', [''])[0]
+            revision = query.get('revision', [''])[0]
+            if product in {item['id'] for item in DATA['items']} and variant in ('红色款', '蓝色款') and revision.isdigit():
+                color = '#ad4043' if variant == '红色款' else '#365c99'
+                body, code = f'<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" fill="{color}"/><circle cx="48" cy="48" r="24" fill="#f4dda3"/></svg>', 200
+            else:
+                body, code = '未找到', 404
+        elif parsed.path == '/license':
+            query = parse_qs(parsed.query)
+            product = query.get('product', [''])[0]
+            variant = query.get('variant', [''])[0]
+            revision = query.get('revision', [''])[0]
+            if product in {item['id'] for item in DATA['items']} and variant in ('红色款', '蓝色款') and revision.isdigit():
+                body, code = f'<main data-product="{escape(product)}" data-variant="{escape(variant)}" data-revision="{escape(revision)}">本地演练授权说明</main>', 200
+            else:
+                body, code = '未找到', 404
         else:
             body, code = '未找到', 404
         encoded = body.encode('utf-8')
         self.send_response(code)
-        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Type', 'image/svg+xml' if parsed.path == '/material' and code == 200 else 'text/html; charset=utf-8')
         self.send_header('Content-Length', str(len(encoded)))
         self.end_headers()
         self.wfile.write(encoded)
