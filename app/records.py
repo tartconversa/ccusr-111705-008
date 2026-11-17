@@ -28,3 +28,22 @@ def read_detail_entries(path):
     with sqlite3.connect(path) as db:
         rows = db.execute('SELECT payload FROM detail_entries ORDER BY visit_id').fetchall()
     return [json.loads(row[0]) for row in rows]
+
+def save_observations(path, observations):
+    """追加式保存详情采集记录；不同规格或不同素材版本各自成行，互不覆盖。"""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(path) as db:
+        db.execute('CREATE TABLE IF NOT EXISTS observations (obs_id INTEGER PRIMARY KEY, item_id TEXT NOT NULL, business_key TEXT NOT NULL, material_key TEXT NOT NULL, observed_at TEXT NOT NULL, source TEXT NOT NULL, payload TEXT NOT NULL)')
+        for observation in observations:
+            if observation['catalog_fact']['identity'] != observation['id'] or observation['spec']['product'] != observation['id']:
+                raise ValueError('catalog and detail identity mismatch')
+            fact = observation['observation_fact']
+            db.execute('INSERT INTO observations (item_id, business_key, material_key, observed_at, source, payload) VALUES (?, ?, ?, ?, ?, ?)',
+                       (observation['id'], fact['business_key'], fact['material_key'], observation['observed_at'], observation['source'], json.dumps(observation, ensure_ascii=False)))
+    return len(observations)
+
+def read_observations(path):
+    with sqlite3.connect(path) as db:
+        rows = db.execute('SELECT payload FROM observations ORDER BY obs_id').fetchall()
+    return [json.loads(row[0]) for row in rows]

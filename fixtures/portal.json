@@ -32,6 +32,51 @@
       ],
       "detail": "图片轮播：景泰蓝摆件",
       "preview": "待核对"
+    },
+    {
+      "id": "ip-03",
+      "name": "京绣联名·云肩",
+      "summary": "红色款 · 已展示",
+      "choices": [
+        "红色款",
+        "商品规格-备选"
+      ],
+      "detail": "图片轮播：京绣联名·云肩",
+      "preview": "已展示",
+      "variants": [
+        "红色款",
+        "典藏款"
+      ],
+      "material_variants": [
+        "红色款"
+      ],
+      "license_variants": [
+        "红色款"
+      ]
+    },
+    {
+      "id": "ip-04",
+      "name": "漆器礼盒",
+      "summary": "蓝色款 · 待核对",
+      "choices": [
+        "蓝色款",
+        "商品规格-备选"
+      ],
+      "detail": "图片轮播：漆器礼盒",
+      "preview": "待核对",
+      "license_external": "http://example.invalid/licensing/ip-04"
+    },
+    {
+      "id": "ip-05",
+      "name": "缂丝挂屏",
+      "summary": "红色款 · 待核对",
+      "choices": [
+        "红色款",
+        "商品规格-备选"
+      ],
+      "detail": "图片轮播：缂丝挂屏",
+      "preview": "待核对",
+      "license_revoked": true
     }
   ]
 }

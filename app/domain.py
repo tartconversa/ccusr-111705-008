@@ -16,3 +16,11 @@ def interpret_entry(catalog_fact, signal):
     if signal['product'] != catalog_fact['identity'] or signal['material_variant'] != signal['variant']:
         raise ValueError('product material identity mismatch')
     return {'business_key': f"{signal['product']}:{signal['variant']}", 'variant': signal['variant'], 'material_variant': signal['material_variant']}
+
+def interpret_observation(catalog_fact, spec, image_state, license_state):
+    if spec['product'] != catalog_fact['identity']:
+        raise ValueError('product material identity mismatch')
+    return {'business_key': f"{spec['product']}:{spec['variant']}",
+            'material_key': f"{spec['product']}:{spec['variant']}:r{spec['revision']}",
+            'variant': spec['variant'], 'revision': spec['revision'],
+            'image_state': image_state, 'license_state': license_state}

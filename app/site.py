@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit, parse_qs
 from html import escape
-from .portal_behaviour import detail_fragment, source_extension
+from .portal_behaviour import detail_fragment, source_extension, material_variants, license_variants
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = json.loads((ROOT / 'fixtures' / 'portal.json').read_text(encoding='utf-8'))
@@ -37,7 +37,8 @@ class Handler(BaseHTTPRequestHandler):
             product = query.get('product', [''])[0]
             variant = query.get('variant', [''])[0]
             revision = query.get('revision', [''])[0]
-            if product in {item['id'] for item in DATA['items']} and variant in ('红色款', '蓝色款') and revision.isdigit():
+            item = next((row for row in DATA['items'] if row['id'] == product), None)
+            if item and variant in material_variants(item) and revision.isdigit():
                 color = '#ad4043' if variant == '红色款' else '#365c99'
                 body, code = f'<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" fill="{color}"/><circle cx="48" cy="48" r="24" fill="#f4dda3"/></svg>', 200
             else:
@@ -47,7 +48,8 @@ class Handler(BaseHTTPRequestHandler):
             product = query.get('product', [''])[0]
             variant = query.get('variant', [''])[0]
             revision = query.get('revision', [''])[0]
-            if product in {item['id'] for item in DATA['items']} and variant in ('红色款', '蓝色款') and revision.isdigit():
+            item = next((row for row in DATA['items'] if row['id'] == product), None)
+            if item and variant in license_variants(item) and revision.isdigit():
                 body, code = f'<main data-product="{escape(product)}" data-variant="{escape(variant)}" data-revision="{escape(revision)}">本地演练授权说明</main>', 200
             else:
                 body, code = '未找到', 404
