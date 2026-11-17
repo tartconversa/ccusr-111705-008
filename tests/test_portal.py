@@ -10,6 +10,6 @@ class PortalInteractionTest(BrowserBaselineTest):
             try:
                 page = browser.new_page()
                 page.goto(self.origin + "detail?id=" + DATA["items"][0]["id"], wait_until="domcontentloaded")
-                page.locator('#gallery-next').click();self.assertEqual(page.locator('#gallery-state').inner_text(),'规格素材')
+                page.locator('#gallery-next').click();page.locator('#gallery-state').get_by_text('规格素材').wait_for()
             finally:
                 browser.close()
